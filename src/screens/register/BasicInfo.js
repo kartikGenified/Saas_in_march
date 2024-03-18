@@ -499,7 +499,7 @@ console.log("handleChildComponentData", data)
       setOtp(value);
 
 
-      const params = { mobile: userMobile, name: userName, otp: value, user_type_id: userTypeId, user_type: userType, }
+      const params = { mobile: userMobile, name: userName, otp: value, user_type_id: userTypeId, user_type: userType,type:"login" }
 
 
       verifyOtpFunc(params);

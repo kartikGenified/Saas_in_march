@@ -29,6 +29,7 @@ import { useFetchLegalsMutation } from '../../apiServices/fetchLegal/FetchLegalA
 import * as Keychain from 'react-native-keychain';
 import FastImage from 'react-native-fast-image';
 
+
 const OtpLogin = ({ navigation, route }) => {
   const [mobile, setMobile] = useState("")
   const [name, setName] = useState("")
@@ -154,7 +155,7 @@ const OtpLogin = ({ navigation, route }) => {
   }, [getNameData, getNameError])
 
   useEffect(() => {
-    console.log("Name in use effect--------->>>>>>>>>>>>>>>",name)
+    console.log("Name in use effect--------->>>>>>>>>>>>>>>", name)
   }, [name])
 
   const getMobile = data => {
@@ -185,10 +186,10 @@ const OtpLogin = ({ navigation, route }) => {
     const nameRegex = /^[a-zA-Z\s-]+$/;
     console.log("Data getting function", data)
     if (data !== undefined) {
-   
-        setName(data)
-      
-    
+
+      setName(data)
+
+
     }
   };
 
@@ -240,7 +241,7 @@ const OtpLogin = ({ navigation, route }) => {
         }
       }
     }
-    else{
+    else {
       setError(true)
       setMessage("Please Accept Terms and condition")
     }
@@ -356,27 +357,29 @@ const OtpLogin = ({ navigation, route }) => {
 
           {
             <ButtonNavigateArrow
-            success={success}
-            handleOperation={handleButtonPress}
-            backgroundColor={buttonThemeColor}
-            style={{ color: 'white', fontSize: 16 }}
-            content="Login"
-            navigateTo="VerifyOtp"
-            navigationParams={navigationParams}
-            mobileLength={mobile}
-            isChecked={isChecked && mobile?.length == 10 && name != "" && !hideButton}
-          ></ButtonNavigateArrow>}
+              success={success}
+              handleOperation={handleButtonPress}
+              backgroundColor={buttonThemeColor}
+              style={{ color: 'white', fontSize: 16 }}
+              isLoading={sendOtpIsLoading}
+              content="Login"
+              navigateTo="VerifyOtp"
+              navigationParams={navigationParams}
+              mobileLength={mobile}
+              isChecked={isChecked && mobile?.length == 10 && name != "" && !hideButton}
+            ></ButtonNavigateArrow>}
 
-{
-        sendOtpIsLoading && <FastImage
-          style={{ width: 100, height: 100, alignSelf: 'center', marginTop: 10 }}
-          source={{
-            uri: gifUri, // Update the path to your GIF
-            priority: FastImage.priority.normal,
-          }}
-          resizeMode={FastImage.resizeMode.contain}
-        />
-      }
+
+          {
+            sendOtpIsLoading && <FastImage
+              style={{ width: 100, height: 100, alignSelf: 'center', marginTop: 10 }}
+              source={{
+                uri: gifUri, // Update the path to your GIF
+                priority: FastImage.priority.normal,
+              }}
+              resizeMode={FastImage.resizeMode.contain}
+            />
+          }
         </View>
         {error && <ErrorModal modalClose={modalClose} message={message} openModal={error}></ErrorModal>}
 
@@ -391,6 +394,9 @@ const OtpLogin = ({ navigation, route }) => {
         </ButtonNavigate>
 
         </View>} */}
+
+        {/* <JumpingAnimation /> */}
+
       </ScrollView>
     </LinearGradient>
   );

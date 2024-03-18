@@ -1,6 +1,7 @@
-import React,{useState,useEffect} from "react";
+import React, { useState, useEffect } from "react";
 import { View, StyleSheet, TouchableOpacity, Image } from "react-native";
 import PoppinsText from "../../electrons/customFonts/PoppinsText";
+import AnimatedDots from "../../animations/AnimatedDots";
 
 const ButtonNavigateArrow = (props) => {
   const [isClicked, setIsClicked] = useState(false)
@@ -8,22 +9,23 @@ const ButtonNavigateArrow = (props) => {
   // prop to manipulate background color of button
   const style = props.style;
   const isChecked = props.isChecked;
+  const isLoading = props.isLoading
 
   // prop to navigate to another page
   const content = props.content;
 
   console.log(props.success);
- 
 
- 
+
+
   const handleButtonPress = () => {
-    if(!isClicked){
+    if (!isClicked) {
       props.handleOperation();
       setIsClicked(true);
     }
-   setTimeout(() => {
-    setIsClicked(false);
-   }, 1000);
+    setTimeout(() => {
+      setIsClicked(false);
+    }, 1000);
     console.log("buttonpressed");
   };
 
@@ -45,7 +47,14 @@ const ButtonNavigateArrow = (props) => {
         width: "60%",
       }}
     >
-      <PoppinsText style={style} content={content}></PoppinsText>
+      {
+        isLoading ?
+          <AnimatedDots color={'white'} /> :
+          <PoppinsText style={style} content={content}></PoppinsText>
+
+      }
+
+
       <Image
         style={{ height: 20, width: 20, resizeMode: "contain", marginLeft: 20 }}
         source={require("../../../../assets/images/whiteArrowRight.png")}

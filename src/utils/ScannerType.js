@@ -1,0 +1,1 @@
+export const scannerType = "Bar" //QR for Qr Bar For Bar

@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import {View, StyleSheet, Dimensions, Image, ScrollView,BackHandler} from 'react-native';
+import {View, StyleSheet, Dimensions, Image, ScrollView} from 'react-native';
 import {useSelector, useDispatch} from 'react-redux';
 import {BaseUrl} from '../../utils/BaseUrl';
 import LinearGradient from 'react-native-linear-gradient';
@@ -10,6 +10,8 @@ import { slug } from '../../utils/Slug';
 import { setAppUserType, setAppUserName, setAppUserId, setUserData, setId} from '../../../redux/slices/appUserDataSlice';
 import PoppinsTextMedium from '../../components/electrons/customFonts/PoppinsTextMedium';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import {select_userListType} from '../../utils/UiTypes'
+
 
 const SelectUser = ({navigation}) => {
   const [listUsers, setListUsers] = useState();
@@ -24,12 +26,10 @@ const SelectUser = ({navigation}) => {
     },
   ] = useGetAppUsersDataMutation();
   const dispatch = useDispatch()
-  
+
   useEffect(() => {
-    const backHandler = BackHandler.addEventListener('hardwareBackPress', () => true)
     getData()
     getUsers();
-    return () => backHandler.remove()
   }, []);
   useEffect(() => {
     if (getUsersData) {
@@ -37,8 +37,6 @@ const SelectUser = ({navigation}) => {
       dispatch(setAppUsers(getUsersData?.body))
       setListUsers(getUsersData?.body);
     } else if(getUsersError) {
-      setError(true)
-      setMessage("Error in getting profile data, kindly retry after sometime")
       console.log("getUsersError",getUsersError);
     }
   }, [getUsersData, getUsersError]);
@@ -130,12 +128,12 @@ const SelectUser = ({navigation}) => {
         
           <Image
             style={{
-              height: 200,
+              height: 150,
               width: 240,
               resizeMode: 'contain',
               top: 60,
             }}
-            source={{uri: icon}}></Image>
+            source={{uri: `${BaseUrl}/api/images/${icon}`}}></Image>
 
             <View style={{width:'80%',alignItems:"center",justifyContent:'center',borderColor:ternaryThemeColor,borderTopWidth:1,borderBottomWidth:1,height:40,marginTop:40}}>
               <PoppinsTextMedium style={{color:'#171717',fontSize:20,fontWeight:'700'}} content="Choose your profile "></PoppinsTextMedium>
@@ -144,8 +142,6 @@ const SelectUser = ({navigation}) => {
       </View>
      
        
-     
-      
         <View style={styles.userListContainer}>
           {listUsers &&
             listUsers.map((item, index) => {
@@ -162,6 +158,7 @@ const SelectUser = ({navigation}) => {
                   color={ternaryThemeColor}
                   image={item.user_type_logo}
                   content={item.user_type}
+                  userListType = {select_userListType}
                   id={item.user_type_id}></SelectUserBox>
               );
             })}

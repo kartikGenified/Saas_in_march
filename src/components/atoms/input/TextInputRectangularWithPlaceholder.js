@@ -61,7 +61,7 @@ const TextInputRectangularWithPlaceholder = (props) => {
     }
 
     return (
-        <KeyboardAvoidingView>
+        <KeyboardAvoidingView style={{width:"100%", alignItems:'center'}}>
             <View style={{ height: 60, width: '86%', borderColor: '#DDDDDD', alignItems: "center", justifyContent: "center", backgroundColor: 'white', margin: 10, borderWidth: 0.6 }}>
                 <View style={{ alignItems: "center", justifyContent: 'center', backgroundColor: 'white', position: "absolute", top: -15, left: 16 }}>
                     <PoppinsTextMedium style={{ color: "#919191", padding: 4, fontSize: 18 }} content={placeHolder}></PoppinsTextMedium>
