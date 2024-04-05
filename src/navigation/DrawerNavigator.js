@@ -24,6 +24,8 @@ import { useFetchLegalsMutation } from '../apiServices/fetchLegal/FetchLegalApi'
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import ErrorModal from '../components/modals/ErrorModal';
 import { user_type_option } from '../utils/usertTypeOption';
+import { DrawerActions } from '@react-navigation/core';
+
 
 const Drawer = createDrawerNavigator();
 const CustomDrawer = () => {
@@ -333,6 +335,10 @@ const CustomDrawer = () => {
               }
               else if (props.title.toLowerCase() === "passbook") {
                 navigation.navigate("Passbook")
+              }
+              else if (props.title.toLowerCase() === "home") {
+                // navigation.navigate("Dashboard")
+                navigation.dispatch(DrawerActions.toggleDrawer());
               }
               else if (props.title.toLowerCase() === "rewards") {
                 navigation.navigate('RedeemRewardHistory')

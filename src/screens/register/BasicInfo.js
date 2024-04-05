@@ -67,6 +67,7 @@ const BasicInfo = ({ navigation, route }) => {
   const [isValid, setIsValid] = useState(true)
   const [hideButton, setHideButton] = useState(false)
   const [timer, setTimer] = useState(0)
+  const [aadhaarVerified, setAadhaarVerified] = useState(true)
 
   const timeOutCallback = useCallback(() => setTimer(currTimer => currTimer - 1), []);
   const focused = useIsFocused()
@@ -94,13 +95,18 @@ const BasicInfo = ({ navigation, route }) => {
   const userTypeId = route.params.userId
   const needsApproval = route.params.needsApproval
   const navigatingFrom = route.params.navigatingFrom
+  const registrationRequired = route.params.registrationRequired
+  console.log("registration required basic info", registrationRequired)
+  // const navigationParams = { "needsApproval": needsApproval, "userId": userTypeId, "user_type": userType, "mobile": mobile, "name": name, "registrationRequired":registrationRequired}
+  const navigationParams = { "needsApproval": needsApproval, "userId": userTypeId, "userType": userType, "registrationRequired":registrationRequired}
+console.log("navigation params from basic info",navigationParams)
   const name = route.params?.name
   const mobile = route.params?.mobile
   console.log("appUsers", userType, userTypeId, isManuallyApproved, name, mobile)
   const width = Dimensions.get('window').width
   const height = Dimensions.get('window').height
   const gifUri = Image.resolveAssetSource(
-    require("../../../assets/gif/loader.gif")
+    require("../../../assets/gif/loader2.gif")
   ).uri;
 
   let timeoutId;
@@ -419,7 +425,11 @@ const BasicInfo = ({ navigation, route }) => {
 
 
   const handleChildComponentData = data => {
-console.log("handleChildComponentData", data)
+    if(data?.name == "aadhar")
+    {
+      console.log("handleChildComponentData", data)
+
+    }
     // setOtpVisible(true)
     if (data?.name === "name") {
       setUserName(data?.value)
@@ -432,14 +442,49 @@ console.log("handleChildComponentData", data)
       console.log("isValidEmail", isValidEmail(data?.value), isValid)
 
     }
-
-   
+    if(data?.name=== "aadhar")
+    {
+     
+        console.log("aadhar input returned", data?.value?.length)
+      
+        
+       
+      if(data?.value?.length==0 || data?.value==undefined)
+     {
+      setHideButton(false)
+     }
+     else if(data?.value.length<12)
+     {
+      setHideButton(true)
+     }
+    
+     
+     
+     
+      
+     
+      
+      
+    }
+    
 
 
 
 
     if (data?.name === "mobile") {
+      const reg = '^([0|+[0-9]{1,5})?([6-9][0-9]{9})$';
+      const mobReg = new RegExp(reg)
+      if (data?.value?.length === 10) {
+        if(mobReg.test(data?.value))
+      {
       setUserMobile(data?.value)
+      }
+      else{
+        setError(true)
+        setMessage("Please enter a valid mobile number")
+      }
+    }
+
     }
     // Update the responseArray state with the new data
     setResponseArray(prevArray => {
@@ -499,7 +544,7 @@ console.log("handleChildComponentData", data)
       setOtp(value);
 
 
-      const params = { mobile: userMobile, name: userName, otp: value, user_type_id: userTypeId, user_type: userType,type:"login" }
+      const params = { mobile: userMobile, name: userName, otp: value, user_type_id: userTypeId, user_type: userType,type:'login' }
 
 
       verifyOtpFunc(params);
@@ -515,6 +560,17 @@ console.log("handleChildComponentData", data)
     sendOtpFunc(params)
   }
 
+  const addharVerified = (bool)=>{
+    console.log("aadhar text input status", bool)
+    if(!bool)
+    {
+      setAadhaarVerified(false)
+      setHideButton(true)
+    }
+    else{
+      setHideButton(false)
+    }
+  }
 
   const handleRegistrationFormSubmission = () => {
     const inputFormData = {}
@@ -599,7 +655,7 @@ console.log("handleChildComponentData", data)
           message={message}
           openModal={success}
           navigateTo={navigatingFrom === "PasswordLogin" ? "PasswordLogin" : "OtpLogin"}
-          params={{ needsApproval: needsApproval, userType: userType, userId: userTypeId }}></MessageModal>
+          params={{ needsApproval: needsApproval, userType: userType, userId: userTypeId, registrationRequired:registrationRequired }}></MessageModal>
       )}
 
       {otpModal && (
@@ -632,7 +688,7 @@ console.log("handleChildComponentData", data)
             left: 10
           }}
           onPress={() => {
-            navigation.goBack();
+            navigation.navigate('OtpLogin',navigationParams);
           }}>
           <Image
             style={{
@@ -679,7 +735,7 @@ console.log("handleChildComponentData", data)
                             placeHolder={item.name}
                             value={userMobile}
                             label={item.label}
-                            isEditable={false}
+                            isEditable={true}
                           >
                             {' '}
                           </TextInputNumericRectangle>}
@@ -758,19 +814,19 @@ console.log("handleChildComponentData", data)
                 }
 
 
-                else if ((item.name).trim().toLowerCase() === "name") {
-                  return (
-                    <PrefilledTextInput
-                      jsonData={item}
-                      key={index}
-                      handleData={handleChildComponentData}
-                      placeHolder={item.name}
-                      value={userName}
-                      label={item.label}
-                      isEditable={false}
-                    ></PrefilledTextInput>
-                  )
-                }
+                // else if ((item.name).trim().toLowerCase() === "name") {
+                //   return (
+                //     <PrefilledTextInput
+                //       jsonData={item}
+                //       key={index}
+                //       handleData={handleChildComponentData}
+                //       placeHolder={item.name}
+                //       value={userName}
+                //       label={item.label}
+                //       isEditable={false}
+                //     ></PrefilledTextInput>
+                //   )
+                // }
 
 
                 else if ((item.name).trim().toLowerCase() === "email") {
@@ -795,6 +851,7 @@ console.log("handleChildComponentData", data)
                       required={item.required}
                       jsonData={item}
                       key={index}
+                      notVerified={addharVerified}
                       handleData={handleChildComponentData}
                       placeHolder={item.name}
                       label={item.label}

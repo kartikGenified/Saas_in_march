@@ -51,7 +51,7 @@ const RedeemedHistory = ({ navigation }) => {
 
   }
   console.log("appUserData",appUserData)
-  const gifUri = Image.resolveAssetSource(require('../../../assets/gif/loader.gif')).uri;
+  const gifUri = Image.resolveAssetSource(require('../../../assets/gif/loader2.gif')).uri;
   const noData = Image.resolveAssetSource(require('../../../assets/gif/noData.gif')).uri;
   let startDate,endDate
   const [
@@ -302,7 +302,7 @@ const RedeemedHistory = ({ navigation }) => {
                   <Image style={{ height: 20, width: 20, resizeMode: "contain" }} source={require('../../../assets/images/giftWhite.png')}></Image>
                   <PoppinsTextMedium style={{ color: 'white', marginLeft: 10 }} content="Gift"></PoppinsTextMedium>
                 </TouchableOpacity>
-                <TouchableOpacity onPress={() => {
+                {/* <TouchableOpacity onPress={() => {
                   console.log("Coupons")
                   setModalVisible(false)
                   navigation.navigate('RedeemCoupons')
@@ -310,7 +310,7 @@ const RedeemedHistory = ({ navigation }) => {
                 }} style={{ alignItems: "center", justifyContent: "center", backgroundColor: ternaryThemeColor, flexDirection: "row", height: 40, width: 100, borderRadius: 10 }}>
                   <Image style={{ height: 20, width: 20, resizeMode: "contain" }} source={require('../../../assets/images/giftWhite.png')}></Image>
                   <PoppinsTextMedium style={{ color: 'white', marginLeft: 10 }} content="Coupons"></PoppinsTextMedium>
-                </TouchableOpacity>
+                </TouchableOpacity> */}
                 <TouchableOpacity onPress={() => {
                   console.log("cashback")
                   setModalVisible(false)
@@ -434,12 +434,15 @@ const RedeemedHistory = ({ navigation }) => {
     const amount = props.amount
     const image = data.gift.gift[0].images[0]
     console.log("data from listItem", data.gift.gift[0])
+    const icon = useSelector(state => state.apptheme.icon)
+    ? useSelector(state => state.apptheme.icon)
+    : require('../../../assets/images/demoIcon.png');
     return (
       <TouchableOpacity onPress={() => {
         navigation.navigate('RedeemedDetails', { data: data })
       }} style={{ flexDirection: "row", alignItems: "center", justifyContent: "center", marginTop: 10, width: "100%", marginBottom: 10 }}>
         <View style={{ height: 70, width: 70, alignItems: "center", justifyContent: "center", borderRadius: 10, borderWidth: 1, borderColor: '#DDDDDD', right: 10 }}>
-          <Image style={{ height: 50, width: 50, resizeMode: "contain" }} source={{ uri:image }}></Image>
+          <Image style={{ height: 50, width: 50, resizeMode: "contain" }} source={{ uri:icon }}></Image>
         </View>
         <View style={{ alignItems: "flex-start", justifyContent: "center", marginLeft: 0, width: 160 }}>
           <PoppinsTextMedium style={{ fontWeight: '600', fontSize: 16, color: 'black', textAlign: 'auto' }} content={description}></PoppinsTextMedium>

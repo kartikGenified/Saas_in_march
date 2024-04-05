@@ -6,13 +6,20 @@ const DisplayOnlyTextInput = (props) => {
     const photo  = props.photo
     const title = props.title
     const data = props.data
+    const isIcon = props.isIcon
+    const icon = props.icon
+
     console.log("DisplayOnlyTextInput",title,data)
     return (
-        <View style={{width:"90%",alignItems:"flex-start",justifyContent:"center",borderBottomWidth:1,marginBottom:4,paddingBottom:10,borderColor:'#DDDDDD',marginTop:10}}>
+        <View style={{width:"90%",alignItems:"flex-start",justifyContent:"center",borderBottomWidth:1,marginBottom:4,paddingBottom:10,borderColor:'#DDDDDD',marginTop:10.}}>
+            <View style={{flexDirection:'row'}}>
+          {isIcon &&   <Image style={{height:20,width:20}} source={require('../../../assets/images/userGrey.png')}/>}
             <View style={{flexDirection:"row",alignItems:"center",justifyContent:"center"}}>
                 
                 <PoppinsTextMedium style={{fontSize:16,fontWeight:'600',color:'grey',marginLeft:10}} content={title}></PoppinsTextMedium>
             </View>
+            </View>
+        
             <PoppinsTextMedium style={{marginRight:10,fontSize:16,color:'#171717',marginLeft:14,marginTop:10}} content={data}></PoppinsTextMedium>
         </View>
     );

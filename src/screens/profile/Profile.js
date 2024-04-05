@@ -79,7 +79,7 @@ const Profile = ({ navigation }) => {
     if (formFields !== undefined && formValues !== undefined) {
       setShowProfileData(true)
     }
-  }, [formFields, formValues, focused,profileData])
+  }, [formFields, formValues, focused, profileData])
 
   useEffect(() => {
     if (getActiveMembershipData) {
@@ -117,17 +117,16 @@ const Profile = ({ navigation }) => {
     }
     else if (fetchProfileData) {
       console.log('fetchProfileData', fetchProfileData);
-      if(fetchProfileData.success)
-      {
-      setProfileData(fetchProfileData)
+      if (fetchProfileData.success) {
+        setProfileData(fetchProfileData)
       }
     } else if (fetchProfileError) {
       console.log('fetchProfileError', fetchProfileError);
     }
-  }, [getFormData, getFormError, focused,fetchProfileData, fetchProfileError,profileData]);
+  }, [getFormData, getFormError, focused, fetchProfileData, fetchProfileError, profileData]);
 
 
- 
+
   useEffect(() => {
     const fetchData = async () => {
       const credentials = await Keychain.getGenericPassword();
@@ -147,7 +146,7 @@ const Profile = ({ navigation }) => {
   }, [focused]);
 
   useEffect(() => {
-    
+
   }, []);
 
   const getMembership = async () => {
@@ -160,12 +159,12 @@ const Profile = ({ navigation }) => {
       getActiveMembershipFunc(token)
     }
   }
-  
-  const deleteID=()=>{
+
+  const deleteID = () => {
     setShowDeleteModal(!showDeleteModal)
   }
   const filterNameFromFormFields = data => {
-   console.log("filterNameFromFormFields")
+    console.log("filterNameFromFormFields")
     const nameFromFormFields = data.map(item => {
       if (item.name === 'name') {
         setProfileName(true);
@@ -178,11 +177,10 @@ const Profile = ({ navigation }) => {
 
   const filterProfileDataAccordingToForm = arrayNames => {
     console.log("inside filterProfileDataAccordingToForm")
-    if(profileData)
-    {
-    console.log("filterProfileDataAccordingToForm",arrayNames,profileData)
+    if (profileData) {
+      console.log("filterProfileDataAccordingToForm", arrayNames, profileData)
 
-      if (arrayNames ) {
+      if (arrayNames) {
 
         let temparr = [];
         arrayNames.map(item => {
@@ -193,19 +191,18 @@ const Profile = ({ navigation }) => {
         console.log(temparr);
       }
     }
-    else{
+    else {
       console.log("filterProfileDataAccordingToForm profileData empty")
-      if(fetchProfileData)
-      {
+      if (fetchProfileData) {
         setProfileData(fetchProfileData)
       }
     }
-   
+
   };
-  const hideModal=()=>{
+  const hideModal = () => {
     setShowDeleteModal(false)
   }
-  
+
 
   const name = profileName ? fetchProfileData?.body.name : '';
   const membership = getActiveMembershipData && getActiveMembershipData.body?.tier.name
@@ -245,7 +242,7 @@ const Profile = ({ navigation }) => {
   }
   const GreyBar = () => {
     return (
-      <View style={{ width: '100%', height: 50, flexDirection: "row", alignItems: 'center', justifyContent: 'space-evenly', backgroundColor: '#F9F9F9', borderTopWidth: 1, borderBottomWidth: 1, borderColor: '#DDDDDD' }}>
+      <View style={{ width: '100%', height: 50, flexDirection: "row", alignItems: 'center', justifyContent: 'space-evenly', backgroundColor: '#F9F9F9', borderTopLeftRadius:30 ,borderTopRightRadius:30}}>
         <View style={{ flexDirection: "row", alignItems: 'center', justifyContent: 'center' }}>
           <Image style={{ height: 20, width: 20, resizeMode: "contain" }} source={require('../../../assets/images/mobileBlack.png')}></Image>
           <PoppinsTextMedium style={{ color: 'black', marginLeft: 8 }} content={fetchProfileData.body?.mobile}></PoppinsTextMedium>
@@ -276,7 +273,7 @@ const Profile = ({ navigation }) => {
 
 
     return (
-      <View style={{ width: '100%' }}>
+      <View style={{ width: '100%', backgroundColor: (formFields === undefined && formValues === undefined) ? "white": ternaryThemeColor }}>
         <View
           style={{
             width: '100%',
@@ -284,8 +281,8 @@ const Profile = ({ navigation }) => {
             alignItems: 'center',
             justifyContent: 'center',
             backgroundColor: ternaryThemeColor,
-            borderBottomWidth: 0.3,
-            borderColor: 'white',
+            // borderBottomWidth: 0.3,
+            // borderColor: 'white',
             paddingBottom: 40,
 
           }}>
@@ -301,8 +298,8 @@ const Profile = ({ navigation }) => {
                 borderWidth: 1,
                 borderColor: 'white'
               }}
-                onPress={()=>{setModalBorder(true)}}
-              >
+              onPress={() => { setModalBorder(true) }}
+            >
               {fetchProfileData?.body?.profile_pic ? (
                 <Image
                   style={{ height: 98, width: 98, resizeMode: 'contain', borderRadius: 49 }}
@@ -312,10 +309,11 @@ const Profile = ({ navigation }) => {
                   style={{ height: 60, width: 60, resizeMode: 'contain' }}
                   source={require('../../../assets/images/userGrey.png')}></Image>
               )}
-         
+
 
             </TouchableOpacity>
           )}
+
           <View
             style={{
               alignItems: 'flex-start',
@@ -323,6 +321,7 @@ const Profile = ({ navigation }) => {
               width: 140,
               height: 100,
               marginLeft: 10,
+
             }}>
             <PoppinsText
               style={{ color: 'white', fontSize: 20 }}
@@ -396,11 +395,11 @@ const Profile = ({ navigation }) => {
             </TouchableOpacity>
             <TouchableOpacity
               onPress={() => {
-               deleteID();
+                deleteID();
               }}
-              style={{ height: 40, width: 40, borderRadius: 20, backgroundColor: "white", borderWidth: 1, borderColor: ternaryThemeColor, alignItems: "center", justifyContent: 'center',marginTop:20 }}>
-               <Delete name="delete" size={24} color={ternaryThemeColor}></Delete>
-              
+              style={{ height: 40, width: 40, borderRadius: 20, backgroundColor: "white", borderWidth: 1, borderColor: ternaryThemeColor, alignItems: "center", justifyContent: 'center', marginTop: 20 }}>
+              <Delete name="delete" size={24} color={ternaryThemeColor}></Delete>
+
             </TouchableOpacity>
           </View>
         </View>
@@ -409,11 +408,11 @@ const Profile = ({ navigation }) => {
     );
   };
 
-  
+
   const ModalContent = () => {
     return (
       <View style={{ width: '100%', alignItems: "center", justifyContent: "center" }}>
-        <View style={{ marginTop: 30, alignItems: 'center', maxWidth: '80%', marginBottom:20 }}>
+        <View style={{ marginTop: 30, alignItems: 'center', maxWidth: '80%', marginBottom: 20 }}>
           {fetchProfileData ? (
             <Image
               style={{ height: 300, width: 300, resizeMode: 'contain', borderRadius: 200 }}
@@ -427,7 +426,7 @@ const Profile = ({ navigation }) => {
 
         <TouchableOpacity style={[{
           backgroundColor: ternaryThemeColor, padding: 6, borderRadius: 5, position: 'absolute', top: -10, right: -10,
-        }]} onPress={()=>setModalBorder(false)} >
+        }]} onPress={() => setModalBorder(false)} >
           <Close name="close" size={25} color="#ffffff" />
         </TouchableOpacity>
 
@@ -437,7 +436,7 @@ const Profile = ({ navigation }) => {
 
 
   return (
-    <View style={{ ...styles.container, backgroundColor: "white" }}>
+    <View style={{ ...styles.container, backgroundColor: ternaryThemeColor}}>
       <View
         style={{
           height: 50,
@@ -461,18 +460,22 @@ const Profile = ({ navigation }) => {
 
       </View>
       {!showNoDataFoundMessage && <ProfileHeader></ProfileHeader>}
-      {fetchProfileData && <GreyBar></GreyBar>}
-      {showDeleteModal && <DeleteModal hideModal = {hideModal} modalVisible={showDeleteModal}></DeleteModal>}
+      {fetchProfileData &&
+        <View style={{}}>
+          <GreyBar></GreyBar>
+        </View>
+      }
+      {showDeleteModal && <DeleteModal hideModal={hideModal} modalVisible={showDeleteModal}></DeleteModal>}
       <ScrollView>
 
         {showProfileData && <>
           <View
             style={{
-              borderTopRightRadius: 30,
-              borderTopLeftRadius: 30,
+              // borderTopRightRadius: 30,
+              // borderTopLeftRadius: 30,
               backgroundColor: 'white',
 
-              marginTop: 10,
+              // marginTop: 10,
               alignItems: 'center',
               justifyContent: 'center',
             }}>
@@ -482,33 +485,40 @@ const Profile = ({ navigation }) => {
                 console.log("showProfileData", item, formValues[index]);
                 if (item.type === "date" || item.type === "Date") {
                   return (
+                    <View>
+      
+
                     <DisplayOnlyTextInput
                       key={index}
-                      data={formValues[index] === null || formValues[index] === undefined  ? 'No data available' : moment(formValues[index]).format("DD-MMM-YYYY")}
+                      data={formValues[index] === null || formValues[index] === undefined ? 'No data available' : moment(formValues[index]).format("DD-MMM-YYYY")}
                       title={item.label}
+                      isIcon={true}
+                      icon={item?.icon}
                       photo={require('../../../assets/images/eye.png')}>
-
                     </DisplayOnlyTextInput>
+
+                    </View>
+             
 
                   );
                 }
                 else {
-                  if ((item.name).toLowerCase() === "enrollment_date" ) {
+                  if ((item.name).toLowerCase() === "enrollment_date") {
                     return (
                       <DisplayOnlyTextInput
                         key={index}
-                        data={formValues[index] === null || formValues[index] === undefined  ? 'No data available' : moment(formValues[index]).format("DD-MMM-YYYY")}
+                        data={formValues[index] === null || formValues[index] === undefined ? 'No data available' : moment(formValues[index]).format("DD-MMM-YYYY")}
                         title={item.label}
                         photo={require('../../../assets/images/eye.png')}>
-  
+
                       </DisplayOnlyTextInput>
-  
+
                     );
                   }
                   return (
                     <DisplayOnlyTextInput
                       key={index}
-                      data={formValues[index] === null || formValues[index] === undefined   ? 'No data available' : formValues[index]}
+                      data={formValues[index] === null || formValues[index] === undefined ? 'No data available' : formValues[index]}
                       title={item.label}
                       photo={require('../../../assets/images/eye.png')}>
 
@@ -546,7 +556,7 @@ const Profile = ({ navigation }) => {
       </ScrollView>
 
       {openModalWithBorder && <ModalWithBorder
-        modalClose={() => {()=> setModalBorder(false) }}
+        modalClose={() => { () => setModalBorder(false) }}
         // message={message}
         openModal={openModalWithBorder}
         comp={ModalContent}></ModalWithBorder>}

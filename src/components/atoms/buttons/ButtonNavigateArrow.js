@@ -31,6 +31,7 @@ const ButtonNavigateArrow = (props) => {
 
   return (
     <TouchableOpacity
+      disabled={props.isLoading}
       onPress={() => {
         handleButtonPress();
       }}

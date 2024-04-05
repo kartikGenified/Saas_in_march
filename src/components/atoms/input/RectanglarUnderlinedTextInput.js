@@ -87,7 +87,7 @@ const RectanglarUnderlinedTextInput = (props) => {
           width: "100%",
           height: 50,
           fontWeight: "400",
-          color: "black",
+          color:"black",
           marginLeft: 10,
           fontSize: 16,
         }}
