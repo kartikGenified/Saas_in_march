@@ -28,7 +28,6 @@ const App = () => {
      
     
 
-<<<<<<< HEAD
     //   useEffect(() => {
     //     const checkAppVersion = async () => {
     //       try {
@@ -38,23 +37,11 @@ const App = () => {
     //                 : await VersionCheck.getLatestVersion({
     //                     provider: 'playStore',
     //                     forceUpdate: true,
-=======
-      useEffect(() => {
-        const checkAppVersion = async () => {
-          try {
-    const latestVersion = Platform.OS === 'ios'? await fetch(`https://itunes.apple.com/in/lookup?bundleId=com.saas`)
-                    .then(r => r.json())
-                    .then((res) => { return res?.results[0]?.version })
-                    : await VersionCheck.getLatestVersion({
-                        provider: 'playStore',
-                        forceUpdate: true,
->>>>>>> 145d41e4fb617d8c7f1adbb0fd80915150a056a0
                        
     //                 });
     
     //         const currentVersion = VersionCheck.getCurrentVersion();
     
-<<<<<<< HEAD
     //         console.log("current verison and new version,",currentVersion, latestVersion)
     //         if (latestVersion > currentVersion) {
     //           Alert.alert(
@@ -82,35 +69,6 @@ const App = () => {
     //         console.error('Error checking app version:', error);
     //       }
     //     };
-=======
-            console.log("current verison and new version,",currentVersion, latestVersion)
-            if (latestVersion > currentVersion) {
-              Alert.alert(
-                'Update Required',
-    'A new version of the app is available. Please update to continue using the app.',
-                [
-                  {
-                    text: 'Update Now',
-                    onPress: () => {
-                      Linking.openURL(
-                        Platform.OS === 'ios'
-                          ? 'https://apps.apple.com/in/app/ozostars-%E0%A4%8F%E0%A4%95-%E0%A4%AA%E0%A4%B9%E0%A4%B2-%E0%A4%85%E0%A4%AA%E0%A4%A8-%E0%A4%95-%E0%A4%B8-%E0%A4%A5/id1554075490'
-                          : "https://play.google.com/store/apps/details?id=com.saas"
-                      );
-                    },
-                  },
-                ],
-                { cancelable: false }
-              );
-            } else {
-              // App is up-to-date; proceed with the app
-            }
-          } catch (error) {
-            // Handle error while checking app version
-            console.error('Error checking app version:', error);
-          }
-        };
->>>>>>> 145d41e4fb617d8c7f1adbb0fd80915150a056a0
     
     //     checkAppVersion();
     //   }, []);
