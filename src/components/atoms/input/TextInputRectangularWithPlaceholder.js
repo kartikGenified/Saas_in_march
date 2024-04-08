@@ -2,6 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, TextInput, KeyboardAvoidingView } from 'react-native';
 import PoppinsTextMedium from '../../electrons/customFonts/PoppinsTextMedium';
 import PoppinsTextLeftMedium from '../../electrons/customFonts/PoppinsTextLeftMedium';
+import { useIsFocused } from '@react-navigation/native';
+
+
 const TextInputRectangularWithPlaceholder = (props) => {
     const [value, setValue] = useState(props.value)
     const [keyboardType, setKeyboardType] = useState(props.keyboardType)
@@ -12,11 +15,20 @@ const TextInputRectangularWithPlaceholder = (props) => {
     const required = props.jsonData?.required
     const specialChar = props.specialCharValidation
     const title  = props.title
+    const from = props.from
+
+    const focused = useIsFocused()
 
     useEffect(() => {
         setValue(props.value)
         props.handleData(props.value,props.title)
     }, [props.value])
+
+    useEffect(()=>{
+        console.log("from", from)
+          from == "OTPLogin"  &&  setValue("")
+        
+    },[focused])
 
     useEffect(() => {
         if (placeHolder === "Mobile No") {

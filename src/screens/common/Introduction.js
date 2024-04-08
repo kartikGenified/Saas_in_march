@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import {View, StyleSheet, Text,Image, TouchableOpacity, ImageBackground} from 'react-native';
 import DotHorizontalList from '../../components/molecules/DotHorizontalList';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { user_type_option } from '../../utils/usertTypeOption';
 
 
 
@@ -45,7 +46,14 @@ const Introduction = ({navigation}) => {
             if(imageIndex==descriptionImages?.length-1)
             {
                 storeData();
-                navigation.navigate('SelectUser');
+                if(user_type_option == "single"){
+                navigation.navigate('OTPLogin');
+
+                }
+                else{
+                    navigation.navigate('SelectUser');
+
+                }
             }
             else{
                 setImageIndex(imageIndex+1)
@@ -58,7 +66,15 @@ const Introduction = ({navigation}) => {
     const handleSkip=()=>{
         // navigation.navigate('SelectLanguage')
         storeData();
-        navigation.navigate('SelectUser')
+        if(user_type_option == "single"){
+            navigation.navigate('OTPLogin');
+
+            }
+            else{
+                navigation.navigate('SelectUser');
+
+            }
+        // navigation.navigate('SelectUser')
 
     }
 

@@ -17,6 +17,7 @@ import { useGetAppUsersDataMutation } from '../../apiServices/appUsers/AppUsersA
 import Geolocation from '@react-native-community/geolocation';
 import InternetModal from '../../components/modals/InternetModal';
 import ErrorModal from '../../components/modals/ErrorModal';
+import { user_type_option } from '../../utils/usertTypeOption';
 
 
 const Splash = ({ navigation }) => {
@@ -24,16 +25,24 @@ const Splash = ({ navigation }) => {
   const focused = useIsFocused()
   const [connected, setConnected] = useState(true)
   const [isSlowInternet, setIsSlowInternet] = useState(false)
+  const [listUsers, setListUsers] = useState([]);
+
   const [message, setMessage] = useState();
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState(false);
   const [isAlreadyIntroduced, setIsAlreadyIntroduced] = useState(null);
   const [gotLoginData, setGotLoginData] = useState()
   const isConnected = useSelector(state => state.internet.isConnected);
+  const [isUserLoggedIn, setIsUserLoggedIn] = useState(null)
+
   
 
 
   const gifUri = Image.resolveAssetSource(require('../../../assets/gif/ozoStars.gif')).uri;
+  const registrationRequired = useSelector(state => state.appusers.registrationRequired)
+  const manualApproval = useSelector(state => state.appusers.manualApproval)
+  const otpLogin = useSelector(state => state.apptheme.otpLogin)
+
   // generating functions and constants for API use cases---------------------
   const [
     getAppTheme,
@@ -56,7 +65,7 @@ const Splash = ({ navigation }) => {
 
   useEffect(()=>{
     getUsers();
-    getAppTheme("bata")
+    getAppTheme("tibcon")
     const checkToken = async () => {
       const fcmToken = await messaging().getToken();
       if (fcmToken) {
@@ -100,6 +109,14 @@ const Splash = ({ navigation }) => {
     dispatch({ type: 'NETWORK_REQUEST' });
   },[])
 
+  useEffect(() => {
+    // console.log("list user ki ==========>", isUserLoggedIn)
+    if (user_type_option == "single") {
+      isUserLoggedIn !== null && !isUserLoggedIn && checkRegistrationRequired(listUsers)
+    }
+
+  }, [listUsers?.[0]?.user_type, isUserLoggedIn])
+
   useEffect(()=>{
     if(isConnected)
     {
@@ -113,23 +130,81 @@ const Splash = ({ navigation }) => {
   
   useEffect(() => {
     if (getUsersData) {
-      // console.log("type of users",getUsersData?.body);
-      const appUsers = getUsersData?.body.map((item,index)=>{
+      console.log("type of users", getUsersData.body);
+      const appUsers = getUsersData.body.map((item, index) => {
         return item.name
       })
-      const appUsersData = getUsersData?.body.map((item,index)=>{
-        return {"name":item.name,
-      "id":item.user_type_id
-      }
+      const appUsersData = getUsersData.body.map((item, index) => {
+        return {
+          "name": item.name,
+          "id": item.user_type_id
+        }
       })
-      // console.log("appUsers",appUsers,appUsersData)
+      console.log("appUsers", appUsersData)
+
       dispatch(setAppUsers(appUsers))
       dispatch(setAppUsersData(appUsersData))
+      setTimeout(() => {
+        setListUsers(getUsersData.body);
+      }, 2000)
 
-    } else if(getUsersError) {
-      console.log("getUsersError",getUsersError);
+    } else if (getUsersError) {
+      console.log("getUsersError", getUsersError);
     }
   }, [getUsersData, getUsersError]);
+
+  const checkApprovalFlow = (registrationRequired) => {
+    if (manualApproval.includes(getUsersData?.body?.[0].user_type)) {
+    listUsers &&  handleNavigationBaseddOnUser(true, registrationRequired)
+    }
+    else {
+     listUsers && handleNavigationBaseddOnUser(false, registrationRequired)
+    }
+  }
+
+  const handleNavigationBaseddOnUser = (needsApproval, registrationRequired) => {
+    console.log("Needs Approval", needsApproval)
+    if (otpLogin.includes(getUsersData?.body?.[0].user_type)
+    ) {
+   
+
+        setTimeout(()=>{
+          // listUsers && navigation.reset({ index: '0', routes: [{ name: 'OtpLogin',params:{needsApproval: needsApproval, userType: listUsers[0]?.user_type, userId: listUsers[0]?.user_type_id, registrationRequired: registrationRequired }}] })
+        // listUsers && navigation.reset('OtpLogin', { needsApproval: needsApproval, userType: listUsers[0]?.user_type, userId: listUsers[0]?.user_type_id, registrationRequired: registrationRequired })
+        listUsers && navigation.navigate('OtpLogin', { needsApproval: needsApproval, userType: listUsers[0]?.user_type, userId: listUsers[0]?.user_type_id, registrationRequired: registrationRequired })
+
+
+        },5000)
+
+
+    }
+    else {
+      setTimeout(() => {
+        listUsers && navigation.navigate('OtpLogin', { needsApproval: needsApproval, userType: listUsers[0]?.user_type, userId: listUsers[0]?.user_type_id, registrationRequired: registrationRequired })
+      // listUsers &&  navigation.reset({ index: '0', routes: [{ name: 'OtpLogin',params:{needsApproval: needsApproval, userType: listUsers[0]?.user_type, userId: listUsers[0]?.user_type_id, registrationRequired: registrationRequired }}] })       
+
+
+      }, 4000)
+      // console.log("Password Login", props.content, props.id, registrationRequired, needsApproval)
+    }
+  }
+
+
+  const checkRegistrationRequired = (listUsers) => {
+    console.log("checkRegistrationRequired pe list user---------------->", listUsers[0])
+
+    if (registrationRequired.includes(listUsers?.[0]?.user_type)) {
+      checkApprovalFlow(true)
+      console.log("registration required")
+    }
+    else {
+      checkApprovalFlow(false)
+      console.log("registration not required")
+
+    }
+
+
+  }
 
  
   
@@ -152,7 +227,8 @@ const Splash = ({ navigation }) => {
           dispatch(setUserData(parsedJsonValue))
           dispatch(setId(parsedJsonValue.id))
           
-          navigation.navigate('Dashboard');
+          // navigation.navigate('Dashboard');
+          navigation.reset({ index: '0', routes: [{ name: 'Dashboard' }] })     
 
          
         }
@@ -163,23 +239,34 @@ const Splash = ({ navigation }) => {
 
           // console.log("isAlreadyIntroduced",isAlreadyIntroduced)
         }
-        else 
-        {
-          if(value==="Yes")
-          {
-            navigation.navigate('SelectUser');
-
+        else {
+          setIsUserLoggedIn(false)
+          if (value === "Yes") {
+            if (user_type_option == "single") {
+              checkRegistrationRequired()
+            }
+            else {
+              setTimeout(()=>{
+                navigation.navigate('SelectUser');  
+              // navigation.reset({ index: '0', routes: [{ name: 'OtpLogin' }] })
+   
+  
+              },1000)
+            }
+  
           }
-          else{
-            navigation.navigate('Introduction')
+          else {
+           
+              navigation.navigate('Introduction')
+  
+      
           }
           // console.log("isAlreadyIntroduced",isAlreadyIntroduced,gotLoginData)
-    
-          
-           
-       
-    
+  
+  
+  
         }
+  
 
       }
         
