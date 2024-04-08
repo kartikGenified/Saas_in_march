@@ -1,4 +1,4 @@
-package com.netcarrots.ozone;
+package com.saas;
 
 import com.facebook.react.ReactActivity;
 import com.facebook.react.ReactActivityDelegate;
@@ -13,7 +13,7 @@ public class MainActivity extends ReactActivity {
    */
   @Override
   protected String getMainComponentName() {
-    return "Ozone Overseas";
+    return "saas";
   }
   @Override
   protected void onCreate(Bundle savedInstanceState) {
