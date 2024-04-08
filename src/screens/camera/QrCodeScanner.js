@@ -27,7 +27,7 @@ import { setQrData, setQrIdList } from '../../../redux/slices/qrCodeDataSlice';
 import { useCheckGenuinityMutation } from '../../apiServices/workflow/genuinity/GetGenuinityApi';
 import { useCheckWarrantyMutation } from '../../apiServices/workflow/warranty/ActivateWarrantyApi';
 import { useGetProductDataMutation } from '../../apiServices/product/productApi';
-import { setProductData } from '../../../redux/slices/getProductSlice';
+import { setProductData, setScanningType } from '../../../redux/slices/getProductSlice';
 import { useFetchAllQrScanedListMutation } from '../../apiServices/qrScan/AddQrApi';
 import { useAddRegistrationBonusMutation } from '../../apiServices/pointSharing/pointSharingApi';
 import { useAddBulkQrMutation } from '../../apiServices/bulkScan/BulkScanApi';
@@ -1080,6 +1080,7 @@ const QrCodeScanner = ({ navigation }) => {
       }
       addBulkQrFunc(params)
       dispatch(setQrIdList(addedQrID))
+      dispatch(setScanningType('Bulk'))
       console.log("hry",addedQrID, addedQrList)
     }
     else {
@@ -1100,6 +1101,8 @@ const QrCodeScanner = ({ navigation }) => {
               log: location.lon
             };
             // dispatch(setQrIdList([item.id]))
+            dispatch(setScanningType('Single'))
+
             token && addQrFunc({ token, requestData });
           });
       }
@@ -1367,7 +1370,7 @@ const QrCodeScanner = ({ navigation }) => {
               <ButtonProceed
                 handleOperation={handleAddQr}
                 style={{ color: 'white' }}
-                content={isDistributor ? "Revert Bar & Points" : "Proceed"}
+                content={ "Proceed"}
                 navigateTo={'QrCodeScanner'}></ButtonProceed>
             }
 

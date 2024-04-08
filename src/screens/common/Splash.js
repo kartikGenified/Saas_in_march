@@ -56,7 +56,7 @@ const Splash = ({ navigation }) => {
 
   useEffect(()=>{
     getUsers();
-    getAppTheme("ozone")
+    getAppTheme("bata")
     const checkToken = async () => {
       const fcmToken = await messaging().getToken();
       if (fcmToken) {

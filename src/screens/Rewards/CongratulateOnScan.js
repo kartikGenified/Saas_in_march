@@ -67,7 +67,7 @@ const CongratulateOnScan = ({ navigation, route }) => {
   );
   const qrIdList = useSelector((state) => state.qrData.qrIdList);
   const userData = useSelector((state) => state.appusersdata.userData);
-  console.log("userData", `${userData.user_type}_points`, JSON.stringify(pointSharingData));
+  console.log("userData", `${userData.user_type}_points`, JSON.stringify(pointSharingData),userData);
   const pointPercentage = useSelector(
     (state) => state.pointSharing.percentagePoints
   );
@@ -231,7 +231,7 @@ const CongratulateOnScan = ({ navigation, route }) => {
     if (getActiveMembershipData) {
         console.log("getActiveMembershipData", JSON.stringify(getActiveMembershipData))
         console.log("getMembershipData", JSON.stringify(getMembershipData))
-        if(getActiveMembershipData.success)
+        if(getActiveMembershipData.success && getActiveMembershipData.body!=null)
         {
           const stats = Number(getActiveMembershipData.body?.stats?.total) + Number(productMrp?.mrp)
           const membershiparr = getMembershipData.body
@@ -250,6 +250,10 @@ const CongratulateOnScan = ({ navigation, route }) => {
 
             }
           }
+
+        }
+        else if(getActiveMembershipData.body==null){
+          fetchRewardsAccToWorkflow(0);
 
         }
     }
@@ -345,7 +349,7 @@ const getMembership = async () => {
                 console.log("extraPointEntryFunc",body)
 
               } else if (!shouldSharePoints) {
-                alert("Points can't be shared for this tenant");
+                // alert("Points can't be shared for this tenant");
               }
             } else if (pointSharingData.percentage_points === true) {
               let point; 
@@ -679,7 +683,7 @@ const getMembership = async () => {
               tenant_id: slug,
               token: token,
             };
-            console.log("userPointEntryFunc", body);
+            console.log("userPointEntryFuncFlatPoints", body,userData.user_type,"_points");
             userPointEntryFunc(body);
           };
           submitPoints();

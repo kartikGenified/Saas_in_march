@@ -1,5 +1,5 @@
 import React,{useState,useEffect} from 'react';
-import {View, StyleSheet,TextInput,Modal,Pressable,Text,Image} from 'react-native';
+import {View, StyleSheet,TextInput,Modal,Pressable,Text,Image,Keyboard} from 'react-native';
 import PoppinsTextMedium from '../../electrons/customFonts/PoppinsTextMedium';
 import { useSendAadharOtpMutation } from '../../../apiServices/verification/AadharVerificationApi';
 import { useVerifyAadharMutation } from '../../../apiServices/verification/AadharVerificationApi';
@@ -15,6 +15,8 @@ const TextInputAadhar = (props) => {
     const [showOtp, setShowOtp] = useState(false)
     const [aadharVerified, setAadharVerified] =  useState(false)
     const [aadharExists, setAadharExists] = useState(false)
+    const [keyboardShow, setKeyboardShow] = useState(false)
+
     const placeHolder = props.placeHolder
     const required = props.required
 
@@ -25,7 +27,12 @@ const TextInputAadhar = (props) => {
     ? useSelector(state => state.apptheme.ternaryThemeColor)
     : 'grey';
     const gifUri = Image.resolveAssetSource(require('../../../../assets/gif/loader.gif')).uri;
-
+    Keyboard.addListener("keyboardDidShow", () => {
+      setKeyboardShow(true);
+    });
+    Keyboard.addListener("keyboardDidHide", () => {
+      setKeyboardShow(false);
+    });
     const [sendAadharOtpFunc,{
         data:sendAadharOtpData,
         error:sendAadharOtpError,
@@ -58,7 +65,6 @@ const TextInputAadhar = (props) => {
       }
       else{
         setShowOtp(false)
-        
       }
       }
       
@@ -88,10 +94,12 @@ const TextInputAadhar = (props) => {
           console.log("success")
           setOtpSent(true)
           setShowOtp(true)
+          props.notVerified(true)
         }
         }
         else if(sendAadharOtpError)
         {
+          props.notVerified(false)
         console.log("sendAadharOtpError",sendAadharOtpError)
         
           setAadharExists(true)
@@ -107,12 +115,20 @@ const TextInputAadhar = (props) => {
               {
               setModalVisible(true)
               setAadharVerified(true)
+              props.notVerified(true)
               }
             }
             else if(verifyAadharError){
               console.log("verifyAadharError",verifyAadharError)
+              props.notVerified(false)
+
             }
             },[verifyAadharError,verifyAadharData])
+
+            useEffect(()=>{
+              handleInputEnd()
+          },[keyboardShow])
+
     const handleInput=(text)=>{
         setValue(text)
         // props.handleData(value)
