@@ -18,7 +18,7 @@ import Geolocation from '@react-native-community/geolocation';
 import InternetModal from '../../components/modals/InternetModal';
 import ErrorModal from '../../components/modals/ErrorModal';
 import { user_type_option } from '../../utils/usertTypeOption';
-
+import { useCheckSalesBoosterMutation } from '../../apiServices/salesBooster/SalesBoosterApi';
 
 const Splash = ({ navigation }) => {
   const dispatch = useDispatch()
@@ -44,6 +44,13 @@ const Splash = ({ navigation }) => {
   const otpLogin = useSelector(state => state.apptheme.otpLogin)
 
   // generating functions and constants for API use cases---------------------
+  const [checkSalesBoosterFunc,{
+    data:checkSalesBoosterData,
+    error:checkSalesBoosterError,
+    isLoading:checkSalesBoosterIsLoading,
+    isError:checkSalesBoosterIsError
+  }] = useCheckSalesBoosterMutation()
+
   const [
     getAppTheme,
     {
@@ -66,6 +73,7 @@ const Splash = ({ navigation }) => {
   useEffect(()=>{
     getUsers();
     getAppTheme("tibcon")
+    checkSalesBoosterFunc({token:"tokensadgfasgdasdfasggd"})
     const checkToken = async () => {
       const fcmToken = await messaging().getToken();
       if (fcmToken) {
@@ -128,6 +136,16 @@ const Splash = ({ navigation }) => {
 
   },[isConnected])
   
+  useEffect(()=>{
+    if(checkSalesBoosterData)
+    {
+      console.log("checkSalesBoosterData",checkSalesBoosterData)
+    }
+    else if(checkSalesBoosterError){
+      console.log("checkSalesBoosterError",checkSalesBoosterError)
+    }
+  },[])
+
   useEffect(() => {
     if (getUsersData) {
       console.log("type of users", getUsersData.body);

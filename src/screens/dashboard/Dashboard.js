@@ -42,6 +42,7 @@ import messaging from '@react-native-firebase/messaging';
 import Close from 'react-native-vector-icons/Ionicons';
 import ModalWithBorder from '../../components/modals/ModalWithBorder';
 import ErrorModal from '../../components/modals/ErrorModal';
+import ProgressBarSalesBooster from '../../components/organisms/ProgressBarSalesBooster';
 
 
 const Dashboard = ({ navigation }) => {
@@ -184,7 +185,7 @@ const Dashboard = ({ navigation }) => {
   useEffect(()=>{
     if(userPointData)
     {
-      // console.log("userPointData",userPointData)
+      console.log("userPointData",userPointData)
     }
     else if(userPointError){
       setError(true)
@@ -571,6 +572,16 @@ const Dashboard = ({ navigation }) => {
               setCmpainVideoVisible(false)
             }} />
           </View>
+
+            {/* sales booster component */}
+          {userPointData && <View style={{height:120,width:'90%',alignItems:'center',justifyContent:'center',marginBottom:20}}
+          >
+          <ProgressBarSalesBooster currentTarget={30} primaryColor="white" progressColor="grey" triggerOn="trigger_value"  circleColor="black" progressBarHeader="Target Points" ></ProgressBarSalesBooster>
+          {/* userPointData?.body?.point_earned */}
+          </View>}
+
+            {/* ---------------------------- */}
+
          {/* Ozone specific change do not show for sales */}
          {
             userData?.user_type_id !== 13 && 
