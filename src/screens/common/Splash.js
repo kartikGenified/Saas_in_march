@@ -18,6 +18,7 @@ import Geolocation from '@react-native-community/geolocation';
 import InternetModal from '../../components/modals/InternetModal';
 import ErrorModal from '../../components/modals/ErrorModal';
 import { user_type_option } from '../../utils/usertTypeOption';
+import { request, PERMISSIONS } from 'react-native-permissions';
 
 
 const Splash = ({ navigation }) => {
@@ -35,7 +36,33 @@ const Splash = ({ navigation }) => {
   const isConnected = useSelector(state => state.internet.isConnected);
   const [isUserLoggedIn, setIsUserLoggedIn] = useState(null)
 
-  
+  const [hasPermission, setHasPermission] = useState(null);
+
+  useEffect(() => {
+    checkCameraPermission();
+  }, []);
+
+  const checkCameraPermission = async () => {
+    try {
+      const status = await requestCameraPermission();
+      console.log('Camera Permission Status:', status);
+      setHasPermission(status === 'granted');
+    } catch (error) {
+      console.error('Error checking camera permission:', error);
+    }
+  };
+
+
+  const requestCameraPermission = async () => {
+    try {
+      const result = await request(PERMISSIONS.ANDROID.CAMERA);
+      return result;
+    } catch (error) {
+      console.error('Error requesting camera permission:', error);
+      return 'denied';
+    }
+  };
+
 
 
   const gifUri = Image.resolveAssetSource(require('../../../assets/gif/ozoStars.gif')).uri;
