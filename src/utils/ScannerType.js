@@ -1,1 +1,1 @@
-export const scannerType = "Bar" //QR for Qr Bar For Bar
+export const scannerType = "QR" //QR for Qr Bar For Bar

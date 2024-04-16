@@ -84,9 +84,9 @@ const QrCodeScanner = ({ navigation }) => {
 
   const [hasPermission, setHasPermission] = useState(null);
 
-  useEffect(() => {
-    checkCameraPermission();
-  }, []);
+  // useEffect(() => {
+  //   checkCameraPermission();
+  // }, []);
 
   const checkCameraPermission = async () => {
     try {

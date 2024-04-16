@@ -57,7 +57,8 @@ const SelectUserBox = (props) => {
     }
 
     const handleNavigation = (needsApproval, registrationRequired) => {
-        console.log("Needs Approval", needsApproval)
+        console.log("props.content", props.content,otpLogin)
+        console.log("Needs Approval", needsApproval, )
         if (otpLogin.includes(props.content)
         ) {
             props.navigation.navigate('OtpLogin', { needsApproval: needsApproval, userType: props.content, userId: props.id, registrationRequired: registrationRequired })
@@ -91,7 +92,7 @@ const SelectUserBox = (props) => {
 const styles = StyleSheet.create({
     container: {
         height: 170,
-        width: '47%',
+        width: '42%',
         alignItems: "center",
         justifyContent: "center",
         margin: 10,
