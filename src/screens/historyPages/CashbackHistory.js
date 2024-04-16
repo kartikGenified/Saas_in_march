@@ -331,7 +331,8 @@ import AnimatedDots from "../../components/animations/AnimatedDots";
 import { useGetCashTransactionsMutation } from "../../apiServices/cashback/CashbackRedeemApi";
 import moment from "moment";
 import { useIsFocused } from '@react-navigation/native';
-
+import { useGetWalletBalanceMutation } from "../../apiServices/cashback/CashbackRedeemApi";
+import Wallet from 'react-native-vector-icons/Entypo'
 
 
 const CashbackHistory = ({ navigation }) => {
@@ -566,6 +567,64 @@ const CashbackHistory = ({ navigation }) => {
       </TouchableOpacity>
     );
   };
+
+  const WalletComponent=()=>{
+    const [
+      getWalletBalanceFunc,
+      {
+        data: getWalletBalanceData,
+        error: getWalletBalanceError,
+        isLoading: getWalletBalanceIsLoading,
+        isError: getWalletBalanceIsError,
+      },
+    ] = useGetWalletBalanceMutation();
+
+    useEffect(() => {
+      const getData = async () => {
+        const credentials = await Keychain.getGenericPassword();
+        if (credentials) {
+          console.log(
+            "Credentials successfully loaded for user " + credentials.username
+          );
+          const token = credentials.username;
+          const params = { token: token, appUserId: userData.id };
+  
+          getWalletBalanceFunc(params)
+        }
+      };
+      getData();
+    }, []);
+    
+  
+    useEffect(()=>{
+      if(getWalletBalanceData)
+      {
+        console.log("getWalletBalanceData",getWalletBalanceData)
+      }
+      else if(getWalletBalanceError)
+      {
+        console.log("getWalletBalanceError",getWalletBalanceError)
+      }
+    },[getWalletBalanceData,getWalletBalanceError])
+
+    return (
+      <View style={{width:'100%',padding:10,alignItems:'center',justifyContent:'center',backgroundColor:'white',borderBottomWidth:1,borderColor:"#DDDDDD",elevation:2,flexDirection:'row'}}>
+        <View style={{width:'60%',alignItems:'flex-start',justifyContent:'center'}}>
+        <Wallet style={{marginLeft:10}} name="wallet" size={50} color={ternaryThemeColor}></Wallet>
+        <PoppinsTextMedium style={{fontSize:22,fontWeight:"bold",color:'grey',marginLeft:10}} content="Wallet Balance"></PoppinsTextMedium>
+        <PoppinsTextMedium style={{fontSize:20,fontWeight:'bold',color:'black',marginLeft:10}} content={getWalletBalanceData?.body?.cashback_balance}></PoppinsTextMedium>
+
+        </View>
+        <View style={{width:'40%',alignItems:'center',justifyContent:'flex-start'}}>
+          <TouchableOpacity onPress={()=>{
+            navigation.navigate('RedeemCashback')
+          }} style={{height:40,width:120,backgroundColor:ternaryThemeColor,alignItems:'center',justifyContent:'center',borderRadius:10}}>
+            <PoppinsTextMedium style={{fontSize:20,fontWeight:'bold',color:'white'}} content="Redeem"></PoppinsTextMedium>
+          </TouchableOpacity>
+        </View>
+      </View>
+    )
+  }
   return (
     <View style={{ alignItems: "center", justifyContent: "flex-start" }}>
       <View
@@ -649,7 +708,8 @@ const CashbackHistory = ({ navigation }) => {
         ></PoppinsTextMedium> */}
 
       </View>
-      <Header></Header>
+      {/* <Header></Header> */}
+      <WalletComponent></WalletComponent>
 
       {fetchCashbackEnteriesData && <FlatList
         initialNumToRender={20}
@@ -658,7 +718,7 @@ const CashbackHistory = ({ navigation }) => {
           justifyContent: "center",
           
         }}
-        style={{ width: "100%",height:'78%' }}
+        style={{ width: "100%" }}
         data={fetchCashbackEnteriesData?.body?.data}
         renderItem={({ item, index }) => (
           <CashbackListItem items={item}></CashbackListItem>
@@ -666,7 +726,7 @@ const CashbackHistory = ({ navigation }) => {
         keyExtractor={(item, index) => index}
       />}
       {
-        fetchCashbackEnteriesData?.body?.count === 0 && <View style={{ position:'absolute', width: '100%',height:'78%' ,bottom:0}}>
+        fetchCashbackEnteriesData?.body?.count === 0 && <View style={{ width: '100%',height:'78%'}}>
           <DataNotFound></DataNotFound>
         </View>
       }

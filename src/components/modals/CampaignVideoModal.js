@@ -82,7 +82,7 @@ const CampaignVideoModal = ({ isVisible, onClose }) => {
                 <View style={styles.modalContent}>
                     <PoppinsTextMedium style={{ fontWeight: '800', color: 'black', fontSize: 20 }} content="Campaign App Promotion"></PoppinsTextMedium>
                     {getAppCampaignData &&
-                        <Image style={{ width: '100%', height: 150, resizeMode: "center", marginTop: 10 }} source={{ uri:getAppCampaignData?.body?.data?.[0]?.image }}></Image>
+                        <Image style={{ width: '100%', height: '50%', resizeMode: "center", marginTop: 10 }} source={{ uri:getAppCampaignData?.body?.data?.[0]?.image }}></Image>
                     }
 
 
@@ -129,7 +129,7 @@ const styles = StyleSheet.create({
     modalContent: {
         backgroundColor: 'white',
         width: '90%',
-        height: 350,
+        height: 450,
         borderRadius: 10,
         padding: 20,
     },

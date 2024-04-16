@@ -33,6 +33,22 @@ export const CashbackRedeemApi = baseApi.injectEndpoints({
               };
             },
           }),
+          
+          getWalletBalance:builder.mutation({
+            query: (params) => {
+              console.log("object",params);
+              return {
+                method: "GET",
+                url: `/api/app/userCashback?app_user_id=${params.appUserId}`,
+                headers: {
+                  "Content-Type": "application/json",
+                  Authorization: "Bearer " + params.token,
+                  slug: slug,
+                },
+                
+              };
+            },
+          }),
           getCashTransactions: builder.mutation({
 
             query: (params) => {
@@ -54,5 +70,5 @@ export const CashbackRedeemApi = baseApi.injectEndpoints({
 });
 
 
-export const {useRedeemCashbackMutation,useAddCashToBankMutation,useGetCashTransactionsMutation} = CashbackRedeemApi
+export const {useRedeemCashbackMutation,useAddCashToBankMutation,useGetCashTransactionsMutation,useGetWalletBalanceMutation} = CashbackRedeemApi
 

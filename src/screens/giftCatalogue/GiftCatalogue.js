@@ -58,10 +58,10 @@ export default function GiftCatalogue({ navigation }) {
     if (giftCatalogueData) {
       console.log("fetchGiftCatalogue", JSON.stringify(giftCatalogueData));
       if (giftCatalogueData.success) {
-        setScheme(giftCatalogueData.body);
-        setGifts(giftCatalogueData.body);
-        getCategories(giftCatalogueData.body);
-        setSelectedGifts(giftCatalogueData.body);
+        setScheme(giftCatalogueData?.body);
+        setGifts(giftCatalogueData?.body);
+        getCategories(giftCatalogueData?.body);
+        setSelectedGifts(giftCatalogueData?.body);
       }
     } else if (giftCatalogueError) {
       console.log("giftCatalogueError", giftCatalogueError);
@@ -70,7 +70,7 @@ export default function GiftCatalogue({ navigation }) {
 
 
   const handlePressAll=()=>{
-    giftCatalogueData && setGifts(giftCatalogueData.body)
+    giftCatalogueData && setGifts(giftCatalogueData?.body)
   }
 
   const getCategories = (data) => {
@@ -171,7 +171,7 @@ export default function GiftCatalogue({ navigation }) {
 
     const filterData = () => {
       if (selected === true) {
-        const temp = [...giftCatalogueData.body];
+        const temp = [...giftCatalogueData?.body];
         const filteredArray = temp.filter((item, index) => {
           console.log("From filter", item.brand, title);
           return item.brand === title;
@@ -180,7 +180,7 @@ export default function GiftCatalogue({ navigation }) {
         // setSelectedGifts(filteredArray)
         props.handlePress(filteredArray);
       } else {
-        setGifts(giftCatalogueData.body);
+        setGifts(giftCatalogueData?.body);
         console.log("inside else in filtered component");
       }
     };

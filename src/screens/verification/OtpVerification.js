@@ -17,7 +17,7 @@ import OtpInput from "../../components/organisms/OtpInput";
 import { useVerifyOtpForNormalUseMutation } from "../../apiServices/otp/VerifyOtpForNormalUseApi";
 import * as Keychain from 'react-native-keychain';
 import { useRedeemGiftsMutation } from "../../apiServices/gifts/RedeemGifts";
-import { useRedeemCashbackMutation } from "../../apiServices/cashback/CashbackRedeemApi";
+import { useGetWalletBalanceMutation, useRedeemCashbackMutation } from "../../apiServices/cashback/CashbackRedeemApi";
 import { useGetLoginOtpForVerificationMutation } from "../../apiServices/otp/GetOtpApi";
 import { useAddCashToBankMutation } from "../../apiServices/cashback/CashbackRedeemApi";
 import Geolocation from '@react-native-community/geolocation';
@@ -35,10 +35,10 @@ const OtpVerification = ({navigation,route}) => {
   const [showRedeemButton,setShowRedeemButton] = useState(false)
   const [location,setLocation] = useState()
   const timeOutCallback = useCallback(() => setTimer(currTimer => currTimer - 1), []);
-
+  const walletBalance = useSelector(state=>state.pointWallet.walletBalance)
   const pointsConversion = useSelector(state=>state.redemptionData.pointConversion)
   const cashConversion = useSelector(state=>state.redemptionData.cashConversion)
-console.log("Point conversion and cash conversion data",pointsConversion,cashConversion)
+console.log("Point conversion and cash conversion data",pointsConversion,cashConversion,walletBalance)
   const [
     verifyOtpForNormalUseFunc,
     {
@@ -64,6 +64,8 @@ console.log("Point conversion and cash conversion data",pointsConversion,cashCon
       isError: redeemCashbackIsError,
     },
   ] = useRedeemCashbackMutation();
+
+  
 
   const [addCashToBankFunc,{
     data:addCashToBankData,
@@ -92,6 +94,8 @@ console.log("Point conversion and cash conversion data",pointsConversion,cashCon
   const type = route.params.type
   const selectedAccount = route.params?.selectedAccount
   const brand_product_code = route.params?.brand_product_code
+
+  
   const handleCashbackRedemption=async()=>{
     const credentials = await Keychain.getGenericPassword();
     if (credentials) {
@@ -320,7 +324,7 @@ console.log("Point conversion and cash conversion data",pointsConversion,cashCon
       const user_type = userData.user_type;
       const type = "redemption"
       
-      verifyOtpForNormalUseFunc({ mobile, name, otp, user_type_id, user_type,type });
+      verifyOtpForNormalUseFunc({ mobile, name, otp, user_type_id, user_type,type});
       
   }
   const modalClose = () => {
@@ -341,7 +345,7 @@ console.log("Point conversion and cash conversion data",pointsConversion,cashCon
     cart && cart.map((item, index) => {
       tempID.push(((item.gift_id)))
     })
-    console.log("tempID", tempID)
+    console.log("tempID", tempID,userData,address)
 
     
       const data = {
@@ -354,7 +358,7 @@ console.log("Point conversion and cash conversion data",pointsConversion,cashCon
         "app_user_id": String(userData.id),
         "remarks": "demo",
         "type": "point",
-        "address_id": address.data.id
+        "address_id": address.id
       }
       const params = {
         token: token,
@@ -364,19 +368,28 @@ console.log("Point conversion and cash conversion data",pointsConversion,cashCon
     
     }
     else if(type==="Cashback"){
-      const params = {
-        data :{ user_type_id: userData.user_type_id,
-         user_type: userData.user_type,
-         platform_id: 1,
-         platform: 'mobile',
-         points: Number(pointsConversion),
-         approved_by_id: 1,
-         app_user_id: userData.id,
-         remarks: 'demo'},
-         token:token
-       };
-       redeemCashbackFunc(params)
-       console.log("params",params)
+      if(walletBalance<cashConversion)
+      {
+        const params = {
+          data :{ 
+            user_type_id: userData.user_type_id,
+           user_type: userData.user_type,
+           platform_id: 1,
+           platform: 'mobile',
+           points: Number(pointsConversion),
+           approved_by_id: 1,
+           app_user_id: userData.id,
+           remarks: 'demo'
+          },
+           token:token
+         };
+         redeemCashbackFunc(params)
+         console.log("Cashbackparams",params)
+      }
+      else{
+        handleCashbackRedemption()
+      }
+      
     }
     else if(type==="Coupon"){
       
@@ -416,6 +429,10 @@ console.log("Point conversion and cash conversion data",pointsConversion,cashCon
   const getMobile = (data) => {
     console.log("mobile number from mobile textinput", data)
     setMobile(data);
+    const reg = '^([0|+[0-9]{1,5})?([6-9][0-9]{9})$';
+    const mobReg = new RegExp(reg)
+    if(mobReg.test(data))
+      {
     if (data !== undefined) {
       if (data.length === 10) {
         const user_type = userData.user_type;
@@ -432,6 +449,7 @@ console.log("Point conversion and cash conversion data",pointsConversion,cashCon
 
         Keyboard.dismiss();
       }
+    }
     }
   };
 

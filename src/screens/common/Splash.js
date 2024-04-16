@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, StyleSheet, Text, Image, ImageBackground,PermissionsAndroid, Platform } from 'react-native';
+import { View, StyleSheet, Text, Image, ImageBackground,PermissionsAndroid, Platform,BackHandler,Alert,Linking } from 'react-native';
 import DotHorizontalList from '../../components/molecules/DotHorizontalList';
 import { useGetAppThemeDataMutation } from '../../apiServices/appTheme/AppThemeApi';
 import { useSelector, useDispatch } from 'react-redux'
@@ -18,6 +18,9 @@ import Geolocation from '@react-native-community/geolocation';
 import InternetModal from '../../components/modals/InternetModal';
 import ErrorModal from '../../components/modals/ErrorModal';
 import { user_type_option } from '../../utils/usertTypeOption';
+import { useCheckSalesBoosterMutation } from '../../apiServices/salesBooster/SalesBoosterApi';
+import { setLocation } from '../../../redux/slices/userLocationSlice';
+import {GoogleMapsKey} from "@env"
 import { request, PERMISSIONS } from 'react-native-permissions';
 
 
@@ -27,7 +30,7 @@ const Splash = ({ navigation }) => {
   const [connected, setConnected] = useState(true)
   const [isSlowInternet, setIsSlowInternet] = useState(false)
   const [listUsers, setListUsers] = useState([]);
-
+  const [locationEnabled, setLocationEnabled] = useState(false)
   const [message, setMessage] = useState();
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState(false);
@@ -71,6 +74,13 @@ const Splash = ({ navigation }) => {
   const otpLogin = useSelector(state => state.apptheme.otpLogin)
 
   // generating functions and constants for API use cases---------------------
+  const [checkSalesBoosterFunc,{
+    data:checkSalesBoosterData,
+    error:checkSalesBoosterError,
+    isLoading:checkSalesBoosterIsLoading,
+    isError:checkSalesBoosterIsError
+  }] = useCheckSalesBoosterMutation()
+
   const [
     getAppTheme,
     {
@@ -89,10 +99,149 @@ const Splash = ({ navigation }) => {
       isError: getUsersDataIsError,
     },
   ] = useGetAppUsersDataMutation();
+  useEffect(() => {
+    const backAction = () => {
+      Alert.alert('Exit App', 'Are you sure you want to exit?', [
+        {
+          text: 'Cancel',
+          onPress: () => null,
+          style: 'cancel',
+        },
+        { text: 'Exit', onPress: () => BackHandler.exitApp() },
+      ]);
+      return true;
+    };
 
+    const backHandler = BackHandler.addEventListener(
+      'hardwareBackPress',
+      backAction
+    );
+
+    return () => backHandler.remove();
+  }, []);
+ 
+  useEffect(() => {
+
+    let lat = ''
+    let lon = ''
+
+    const openSettings = () => {
+      if (Platform.OS === 'android') {
+        Linking.openSettings();
+      } else {
+        Linking.openURL('app-settings:');
+      }
+    };
+    const enableLocation = () => {
+      Alert.alert(
+        'Enable Location Services',
+        'Location services are disabled. Do you want to enable them?',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          { text: 'OK', onPress: openSettings },
+        ],
+      );
+    };
+    try{
+      Geolocation.getCurrentPosition((res) => {
+        setLocationEnabled(true)
+        console.log("res", res)
+        lat = res.coords.latitude
+        lon = res.coords.longitude
+        // getLocation(JSON.stringify(lat),JSON.stringify(lon))
+        console.log("latlong", lat, lon)
+        var url = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${res?.coords?.latitude},${res?.coords?.longitude}
+            &location_type=ROOFTOP&result_type=street_address&key=${GoogleMapsKey}`
+  
+        fetch(url).then(response => response.json()).then(json => {
+          // console.log("location address=>", JSON.stringify(json));
+          const formattedAddress = json?.results[0]?.formatted_address
+          const formattedAddressArray = formattedAddress?.split(',')
+  
+          let locationJson = {
+  
+            lat: json?.results[0]?.geometry?.location?.lat === undefined ? "N/A" : json?.results[0]?.geometry?.location?.lat,
+            lon: json?.results[0]?.geometry?.location?.lng === undefined ? "N/A" : json?.results[0]?.geometry?.location?.lng,
+            address: formattedAddress === undefined ? "N/A" : formattedAddress
+  
+          }
+  
+          const addressComponent = json?.results[0]?.address_components
+          // console.log("addressComponent", addressComponent)
+          for (let i = 0; i <= addressComponent.length; i++) {
+            if (i === addressComponent.length) {
+              dispatch(setLocation(locationJson))
+  
+            }
+            else {
+              if (addressComponent[i].types.includes("postal_code")) {
+                console.log("inside if")
+  
+                console.log(addressComponent[i]?.long_name)
+                locationJson["postcode"] = addressComponent[i]?.long_name
+              }
+              else if (addressComponent[i]?.types.includes("country")) {
+                console.log(addressComponent[i]?.long_name)
+  
+                locationJson["country"] = addressComponent[i]?.long_name
+              }
+              else if (addressComponent[i]?.types.includes("administrative_area_level_1")) {
+                console.log(addressComponent[i]?.long_name)
+  
+                locationJson["state"] = addressComponent[i]?.long_name
+              }
+              else if (addressComponent[i]?.types.includes("administrative_area_level_3")) {
+                console.log(addressComponent[i]?.long_name)
+  
+                locationJson["district"] = addressComponent[i]?.long_name
+              }
+              else if (addressComponent[i]?.types.includes("locality")) {
+                console.log(addressComponent[i]?.long_name)
+  
+                locationJson["city"] = addressComponent[i]?.long_name
+              }
+            }
+  
+          }
+  
+  
+          console.log("formattedAddressArray", locationJson)
+  
+        })
+      },(error) => {
+        setLocationEnabled(false)
+        console.log("error", error)
+        if (error.code === 1) {
+          // Permission Denied
+          Geolocation.requestAuthorization()
+
+        } else if (error.code === 2) {
+          // Position Unavailable
+          enableLocation()
+
+        } else {
+          // Other errors
+          Alert.alert(
+            "Error",
+            "An error occurred while fetching your location.",
+            [
+              { text: "OK", onPress: () => console.log("OK Pressed") }
+            ],
+            { cancelable: false }
+          );
+        }
+      })
+  
+    }
+    catch(e){
+      console.log("error in fetching location",e)
+    }
+   
+  }, [navigation])
   useEffect(()=>{
     getUsers();
     getAppTheme("tibcon")
+    checkSalesBoosterFunc({token:"tokensadgfasgdasdfasggd"})
     const checkToken = async () => {
       const fcmToken = await messaging().getToken();
       if (fcmToken) {
@@ -155,6 +304,16 @@ const Splash = ({ navigation }) => {
 
   },[isConnected])
   
+  useEffect(()=>{
+    if(checkSalesBoosterData)
+    {
+      console.log("checkSalesBoosterData",checkSalesBoosterData)
+    }
+    else if(checkSalesBoosterError){
+      console.log("checkSalesBoosterError",checkSalesBoosterError)
+    }
+  },[])
+
   useEffect(() => {
     if (getUsersData) {
       console.log("type of users", getUsersData.body);
@@ -198,7 +357,7 @@ const Splash = ({ navigation }) => {
         setTimeout(()=>{
           // listUsers && navigation.reset({ index: '0', routes: [{ name: 'OtpLogin',params:{needsApproval: needsApproval, userType: listUsers[0]?.user_type, userId: listUsers[0]?.user_type_id, registrationRequired: registrationRequired }}] })
         // listUsers && navigation.reset('OtpLogin', { needsApproval: needsApproval, userType: listUsers[0]?.user_type, userId: listUsers[0]?.user_type_id, registrationRequired: registrationRequired })
-        listUsers && navigation.navigate('OtpLogin', { needsApproval: needsApproval, userType: listUsers[0]?.user_type, userId: listUsers[0]?.user_type_id, registrationRequired: registrationRequired })
+        locationEnabled && listUsers && navigation.navigate('OtpLogin', { needsApproval: needsApproval, userType: listUsers[0]?.user_type, userId: listUsers[0]?.user_type_id, registrationRequired: registrationRequired })
 
 
         },5000)
@@ -207,7 +366,7 @@ const Splash = ({ navigation }) => {
     }
     else {
       setTimeout(() => {
-        listUsers && navigation.navigate('OtpLogin', { needsApproval: needsApproval, userType: listUsers[0]?.user_type, userId: listUsers[0]?.user_type_id, registrationRequired: registrationRequired })
+        locationEnabled && listUsers && navigation.navigate('OtpLogin', { needsApproval: needsApproval, userType: listUsers[0]?.user_type, userId: listUsers[0]?.user_type_id, registrationRequired: registrationRequired })
       // listUsers &&  navigation.reset({ index: '0', routes: [{ name: 'OtpLogin',params:{needsApproval: needsApproval, userType: listUsers[0]?.user_type, userId: listUsers[0]?.user_type_id, registrationRequired: registrationRequired }}] })       
 
 
@@ -255,7 +414,7 @@ const Splash = ({ navigation }) => {
           dispatch(setId(parsedJsonValue.id))
           
           // navigation.navigate('Dashboard');
-          navigation.reset({ index: '0', routes: [{ name: 'Dashboard' }] })     
+         locationEnabled &&  navigation.reset({ index: '0', routes: [{ name: 'Dashboard' }] })     
 
          
         }
@@ -274,7 +433,7 @@ const Splash = ({ navigation }) => {
             }
             else {
               setTimeout(()=>{
-                navigation.navigate('SelectUser');  
+                locationEnabled &&  navigation.navigate('SelectUser');  
               // navigation.reset({ index: '0', routes: [{ name: 'OtpLogin' }] })
    
   
@@ -284,7 +443,7 @@ const Splash = ({ navigation }) => {
           }
           else {
            
-              navigation.navigate('Introduction')
+            locationEnabled &&  navigation.navigate('Introduction')
   
       
           }
