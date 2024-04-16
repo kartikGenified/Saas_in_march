@@ -23,6 +23,9 @@ import MessageModal from '../../components/modals/MessageModal';
 import { useGetQueriesTypeMutation, useSubmitQueriesMutation } from '../../apiServices/supportQueries/supportQueriesApi';
 import PrefilledTextInput from '../../components/atoms/input/PrefilledTextInput';
 import FeedbackTextArea from '../../components/feedback/FeedbackTextArea';
+import ImageInput from '../../components/atoms/input/ImageInput';
+import ImageInputWithUpload from '../../components/atoms/input/ImageInputWithUpload';
+import { useUploadSingleFileMutation } from '../../apiServices/imageApi/imageApi';
 
 const SupportQueries = ({ navigation }) => {
   const [error, setError] = useState(false)
@@ -35,7 +38,8 @@ const SupportQueries = ({ navigation }) => {
   const [selectedOption, setSelectedOption] = useState(null);
   const [tokenNumer, setTokenNumber] = useState(null);
   const [shortDescText, setShortDescText] = useState("");
-  const [hideButton, setHideButton] = useState(false)
+  const [selectedImage, setSelectedImage] = useState(null)
+
 
 
   const ternaryThemeColor = useSelector(
@@ -62,6 +66,20 @@ const SupportQueries = ({ navigation }) => {
     isError: submitQueriesTypeIsError
   }] = useSubmitQueriesMutation()
 
+  const [
+    uploadImageFunc,
+    {
+      data: uploadImageData,
+      error: uploadImageError,
+      isLoading: uploadImageIsLoading,
+      isError: uploadImageIsError,
+    },
+  ] = useUploadSingleFileMutation();
+
+
+
+
+
 
   useEffect(() => {
     const getTypes = async () => {
@@ -79,6 +97,43 @@ const SupportQueries = ({ navigation }) => {
     getTypes()
   }, [])
 
+
+  useEffect(() => {
+    if (uploadImageData?.success) {
+      console.log("uploadImageData", uploadImageData);
+      const uploadArray = []
+      uploadArray.push(uploadImageData?.body?.fileLink)
+      setSelectedImage(uploadImageData?.body?.fileLink)
+    } else {
+      console.log(uploadImageError);
+    }
+  }, [uploadImageData, uploadImageError]);
+
+
+
+
+  const handleChildComponentData = (uri) => {
+    console.log("the uri====>", uri);
+    const imageData = {
+      uri:uri?.uri,
+      name:uri?.uri.slice(0, 10),
+      type: 'image/png',
+    };
+    const uploadFile = new FormData();
+    uploadFile.append('image', imageData);
+    // console.log("invoice data",item.value)
+    const getToken = async () => {
+      const credentials = await Keychain.getGenericPassword();
+      const token = credentials.username;
+
+      uploadImageFunc({ body: uploadFile,token:token });
+  }
+
+  getToken()
+
+
+  }
+
   useEffect(() => {
     if (getQueriesTypeData) {
       console.log("getQueriesTypeData", getQueriesTypeData)
@@ -95,24 +150,21 @@ const SupportQueries = ({ navigation }) => {
   useEffect(() => {
     if (submitQueriesTypeData) {
       console.log("submitQueriesTypeData", submitQueriesTypeData)
-      setHideButton(false)
-      if(submitQueriesTypeData?.success)
-      {
+      if (submitQueriesTypeData?.success) {
         setSuccess(true)
-      setMessage(submitQueriesTypeData?.message)
+        setMessage(submitQueriesTypeData?.message)
       }
-     
+
     }
     else if (submitQueriesTypeError) {
       console.log("getQueriesTypeError", submitQueriesTypeError)
-      setHideButton(false)
-      if(submitQueriesTypeError.status===400)
-      {
+      if (submitQueriesTypeError.status === 400) {
         setError(true)
         setMessage("Kindly fill the complete details")
       }
     }
   }, [submitQueriesTypeData, submitQueriesTypeError])
+
 
   const modalClose = () => {
     setError(false);
@@ -151,7 +203,7 @@ const SupportQueries = ({ navigation }) => {
       console.log("userData", userData)
     }
     else {
-      setHideButton(true)
+
       const token = tokenNumer;
       let body = {
         name: userData.name,
@@ -160,106 +212,117 @@ const SupportQueries = ({ navigation }) => {
         userTypeId: userData.user_type_id,
         short_description: shortDescText,
         long_description: longDesc,
-        type: selectedOption
+        type: selectedOption,
+        image: selectedImage
       }
 
       const params = { body, token }
+      console.log("query submission", JSON.stringify(body))
       submitQueriesTypeFunc(params)
     }
   }
 
   return (
-    <ScrollView style={{width:'100%'}} contentContainerStyle={{alignItems:"center",justifyContent:"center",height:'100%'}}>
-    <View style={{ height: '100%', width: '100%', alignItems: 'center', justifyContent: 'flex-start', backgroundColor: ternaryThemeColor }}>
-      
-      {error && (
-        <ErrorModal
-          modalClose={modalClose}
+    <ScrollView style={{ width: '100%' }} contentContainerStyle={{ alignItems: "center", justifyContent: "center", height: '100%' }}>
+      <View style={{ height: '100%', width: '100%', alignItems: 'center', justifyContent: 'flex-start', backgroundColor: ternaryThemeColor }}>
 
-          message={message}
-          openModal={error}></ErrorModal>
-      )}
-      {success && (
-        <MessageModal
-          modalClose={modalClose}
-          title={"Success"}
-          message={message}
-          openModal={success}
-          navigateTo={"Dashboard"}
-        ></MessageModal>
-      )}
-      <View
-        style={{
-          alignItems: 'center',
-          justifyContent: 'center',
-          width: '100%',
-          height: '10%',
-        }}>
-        <TouchableOpacity
+        {error && (
+          <ErrorModal
+            modalClose={modalClose}
+
+            message={message}
+            openModal={error}></ErrorModal>
+        )}
+        {success && (
+          <MessageModal
+            modalClose={modalClose}
+            title={"Success"}
+            message={message}
+            openModal={success}
+            navigateTo={"Dashboard"}
+          ></MessageModal>
+        )}
+        <View
           style={{
-            height: 24, width: 24,
-            position: 'absolute',
-            top: 20,
-            left: 10
-          }}
-          onPress={() => {
-            navigation.goBack();
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: '100%',
+            height: '10%',
           }}>
-          <Image
+          <TouchableOpacity
             style={{
-              height: 24,
-              width: 24,
-              resizeMode: 'contain',
-              marginLeft: 10,
+              height: 24, width: 24,
+              position: 'absolute',
+              top: 20,
+              left: 10
             }}
-            source={require('../../../assets/images/blackBack.png')}></Image>
-        </TouchableOpacity>
-        <View style={{ alignItems: 'center', justifyContent: 'center', position: "absolute", top: 20, left: 50 }}>
-          <PoppinsTextMedium
-            content="Support Queries"
-            style={{
-              marginLeft: 10,
-              fontSize: 16,
-              fontWeight: '700',
-              color: 'white',
-            }}></PoppinsTextMedium>
+            onPress={() => {
+              navigation.goBack();
+            }}>
+            <Image
+              style={{
+                height: 24,
+                width: 24,
+                resizeMode: 'contain',
+                marginLeft: 10,
+              }}
+              source={require('../../../assets/images/blackBack.png')}></Image>
+          </TouchableOpacity>
+          <View style={{ alignItems: 'center', justifyContent: 'center', position: "absolute", left: 50 }}>
+            <PoppinsTextMedium
+              content="Report Issue"
+              style={{
+                marginLeft: 10,
+                fontSize: 16,
+                fontWeight: '700',
+                color: 'white',
+              }}></PoppinsTextMedium>
+          </View>
+        </View>
+        <View style={{ backgroundColor: 'white', height: '90%', width: '100%', alignItems: 'center', borderTopLeftRadius: 20, borderTopRightRadius: 20, marginTop: 20 }}>
+
+          <View style={{ marginTop: 20, width: '100%', alignItems: 'center' }}>
+            <RectangularUnderlinedDropDown header="Appointment Reason *" data={option} handleData={getReason}></RectangularUnderlinedDropDown>
+          </View>
+
+          <View style={{ marginTop: 30, width: '100%', alignItems: 'center' }}>
+            <PrefilledTextInput
+              jsonData={{
+                label: "Short Description",
+                maxLength: "100",
+                name: "Short Description",
+                options: [],
+                required: true,
+                type: "text",
+              }}
+              // onChangeText = {handleData}
+              handleData={handleData}
+              placeHolder={"Short Description"}
+              label={"Short Description"}
+            ></PrefilledTextInput>
+          </View>
+
+          <View style={{ marginTop: 20, width: '95%', marginBottom: 20 }}>
+            <FeedbackTextArea onFeedbackChange={handleFeedbackChange} placeholder={"Long description"} />
+          </View>
+
+          <View style={{width:'85%'}}>
+            <ImageInputWithUpload
+              // jsonData={item}
+              handleData={handleChildComponentData}
+              // key={index}  
+              data={"Add Image"}
+              action="Select File"></ImageInputWithUpload>
+          </View>
+
+          <TouchableOpacity style={{ width: '92%', borderRadius: 15, marginTop: 30, }} onPress={() => {
+            submitData()
+          }}>
+            <PoppinsTextMedium content={"Report Issue"} style={{ backgroundColor: ternaryThemeColor, height: 50, color: 'white', fontWeight: '800', borderRadius: 5, textAlignVertical: 'center' }}></PoppinsTextMedium>
+          </TouchableOpacity>
+
         </View>
       </View>
-      <View style={{ backgroundColor: 'white', height: '90%', width: '100%', alignItems: 'center', borderTopLeftRadius: 20, borderTopRightRadius: 20, marginTop: 20 }}>
-
-        <View style={{ marginTop: 20, width: '100%', alignItems: 'center' }}>
-          <RectangularUnderlinedDropDown header="Appointment Reason *" data={option} handleData={getReason}></RectangularUnderlinedDropDown>
-        </View>
-
-        <View style={{ marginTop: 30, width: '100%', alignItems: 'center' }}>
-          <PrefilledTextInput
-            jsonData={{
-              label: "Short Description",
-              maxLength: "100",
-              name: "Short Description",
-              options: [],
-              required: true,
-              type: "text",
-            }}
-            // onChangeText = {handleData}
-            handleData={handleData}
-            placeHolder={"Short Description"}
-            label={"Short Description"}
-          ></PrefilledTextInput>
-        </View>
-
-        <View style={{ marginTop: 20, width: '95%', }}>
-          <FeedbackTextArea onFeedbackChange={handleFeedbackChange} placeholder={"Long description"} />
-        </View>
-
-        {!hideButton && <TouchableOpacity style={{ width: '92%', borderRadius: 15, marginTop: 30, }} onPress={() => {
-          submitData()
-        }}>
-          <PoppinsTextMedium content={"Report Issue"} style={{ backgroundColor: ternaryThemeColor, height: 50, color: 'white', fontWeight: '800', borderRadius: 5, textAlignVertical: 'center' }}></PoppinsTextMedium>
-        </TouchableOpacity>}
-
-      </View>
-    </View>
     </ScrollView>
 
   );
