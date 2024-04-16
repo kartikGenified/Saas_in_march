@@ -20,6 +20,10 @@ import { useCashPerPointMutation } from '../../apiServices/workflow/rewards/GetP
 import { useFetchUserPointsMutation } from '../../apiServices/workflow/rewards/GetPointsApi';
 import MessageModal from '../../components/modals/MessageModal';
 import { setPointConversionF,setCashConversionF } from '../../../redux/slices/redemptionDataSlice';
+import { useGetWalletBalanceMutation } from '../../apiServices/cashback/CashbackRedeemApi';
+import { setWalletBalance } from '../../../redux/slices/pointWalletSlice';
+
+
 const RedeemCashback = ({navigation}) => {
   const [message, setMessage] = useState();
   const [error, setError] = useState(false);
@@ -58,7 +62,15 @@ const RedeemCashback = ({navigation}) => {
     isError:cashPerPointIsError
   }] = useCashPerPointMutation()
 
-  
+  const [
+    getWalletBalanceFunc,
+    {
+      data: getWalletBalanceData,
+      error: getWalletBalanceError,
+      isLoading: getWalletBalanceIsLoading,
+      isError: getWalletBalanceIsError,
+    },
+  ] = useGetWalletBalanceMutation();
 
   const points =userPointData?.body.point_balance;
   const minPointsRedeemed = cashPerPointData?.body.min_point_redeem
@@ -103,6 +115,23 @@ else{
       dispatch(setCashConversionF(pointsConversion*conversionFactor))
   }
   },[cashPerPointData,pointsConversion])
+
+  useEffect(()=>{
+    if(getWalletBalanceData)
+    {
+      console.log("getWalletBalanceData",getWalletBalanceData)
+      if(getWalletBalanceData.success)
+      {
+      dispatch(setWalletBalance(Number(getWalletBalanceData?.body?.cashback_balance)))
+      }
+    }
+    else if(getWalletBalanceError)
+    {
+      console.log("getWalletBalanceError",getWalletBalanceError)
+    }
+  },[getWalletBalanceData,getWalletBalanceError])
+
+
   useEffect(()=>{
     fetchToken(userData.id)
     console.log("userData from useeffect",userData.id)
@@ -115,10 +144,12 @@ else{
         'Credentials successfully loaded for user ' + credentials.username,
       );
       const token = credentials.username;
-      
+      const paramsWallet = { token: token, appUserId: userData.id };
       const params = {userId:id,token:token}
       console.log("params",params)
       cashPerPointFunc(token)
+      getWalletBalanceFunc(paramsWallet)
+
       userPointFunc(params)
     }
   }
@@ -213,6 +244,9 @@ else{
         <Image
           style={{height: 140, width: 140}}
           source={require('../../../assets/images/redeemCashback.png')}></Image>
+
+     <View style={{width:'100%',alignItems:'center',justifyContent:'center',flexDirection:'row'}}>
+          <View style={{width:'50%',alignItems:'center',justifyContent:'center'}}>
         <PoppinsText
           style={{fontSize: 24, color: 'black', marginTop: 20}}
           content={points}></PoppinsText>
@@ -223,6 +257,20 @@ else{
             fontWeight: '600',
             marginBottom: 20,
           }}></PoppinsTextMedium>
+          </View>
+          <View style={{width:'50%',alignItems:'center',justifyContent:'center'}}>
+          <PoppinsText
+          style={{fontSize: 24, color: 'black', marginTop: 20}}
+          content={getWalletBalanceData?.body?.cashback_balance}></PoppinsText>
+        <PoppinsTextMedium
+          content="Wallet Balance"
+          style={{
+            color: 'black',
+            fontWeight: '600',
+            marginBottom: 20,
+          }}></PoppinsTextMedium>
+          </View>
+        </View>
         <PoppinsTextMedium
           content="Convert your Points to Cash"
           style={{
