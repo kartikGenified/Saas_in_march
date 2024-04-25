@@ -22,6 +22,8 @@ import { useCheckSalesBoosterMutation } from '../../apiServices/salesBooster/Sal
 import { setLocation } from '../../../redux/slices/userLocationSlice';
 import {GoogleMapsKey} from "@env"
 import { request, PERMISSIONS } from 'react-native-permissions';
+import VersionCheck from 'react-native-version-check';
+import { useCheckVersionSupportMutation } from '../../apiServices/minVersion/minVersionApi';
 
 
 const Splash = ({ navigation }) => {
@@ -99,6 +101,19 @@ const Splash = ({ navigation }) => {
       isError: getUsersDataIsError,
     },
   ] = useGetAppUsersDataMutation();
+
+
+  
+  const [
+    getMinVersionSupportFunc,
+    {
+      data : getMinVersionSupportData,
+      error:getMinVersionSupportError,
+      isLoading:getMinVersionSupportIsLoading,
+      isError:getMinVersionSupportIsError
+    }
+  ] = useCheckVersionSupportMutation()
+
   useEffect(() => {
     const backAction = () => {
       Alert.alert('Exit App', 'Are you sure you want to exit?', [
@@ -245,6 +260,9 @@ const Splash = ({ navigation }) => {
   useEffect(()=>{
     getUsers();
     getAppTheme("tibcon")
+    const currentVersion = VersionCheck.getCurrentVersion();
+    console.log("currentVersion",currentVersion)
+    getMinVersionSupportFunc(currentVersion)
     checkSalesBoosterFunc({token:"tokensadgfasgdasdfasggd"})
     const checkToken = async () => {
       const fcmToken = await messaging().getToken();
@@ -317,6 +335,18 @@ const Splash = ({ navigation }) => {
       console.log("checkSalesBoosterError",checkSalesBoosterError)
     }
   },[])
+
+
+  useEffect(()=>{
+    if(getMinVersionSupportData)
+    {
+      console.log("getMinVersionSupportData",getMinVersionSupportData)
+    }
+    else if(getMinVersionSupportError)
+    {
+      console.log("getMinVersionSupportError",getMinVersionSupportError)
+    }
+  },[getMinVersionSupportData,getMinVersionSupportError])
 
   useEffect(() => {
     if (getUsersData) {

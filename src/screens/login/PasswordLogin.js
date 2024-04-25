@@ -25,7 +25,8 @@ import ButtonOval from '../../components/atoms/buttons/ButtonOval';
 import Checkbox from '../../components/atoms/checkbox/Checkbox';
 import PoppinsTextLeftMedium from '../../components/electrons/customFonts/PoppinsTextLeftMedium';
 import { useFetchLegalsMutation } from '../../apiServices/fetchLegal/FetchLegalApi';
-// import * as Keychain from 'react-native-keychain';  
+import { useGetAppDashboardDataMutation } from '../../apiServices/dashboard/AppUserDashboardApi';
+import { setDashboardData } from '../../../redux/slices/dashboardDataSlice';
 
 const PasswordLogin = ({ navigation, route }) => {
   const [username, setUsername] = useState("influencer_2")
@@ -78,6 +79,12 @@ const PasswordLogin = ({ navigation, route }) => {
 
   // initializing mutations --------------------------------
 
+  const [getDashboardFunc, {
+    data: getDashboardData,
+    error: getDashboardError,
+    isLoading: getDashboardIsLoading,
+    isError: getDashboardIsError
+  }] = useGetAppDashboardDataMutation()
 
   const [passwordLoginfunc, {
     data: passwordLoginData,
@@ -97,10 +104,24 @@ const PasswordLogin = ({ navigation, route }) => {
 
   // retrieving data from api calls--------------------------
 
+
+  useEffect(() => {
+    if (getDashboardData) {
+      console.log("getDashboardData", getDashboardData)
+      dispatch(setDashboardData(getDashboardData?.body?.app_dashboard))
+    }
+    else if (getDashboardError) {
+      
+      console.log("getDashboardError", getDashboardError)
+    }
+  }, [getDashboardData, getDashboardError])
+
   useEffect(() => {
     if (passwordLoginData) {
       console.log("Password Login Data", passwordLoginData)
+      const token = passwordLoginData?.body?.token
       if (passwordLoginData.success) {
+        token && getDashboardFunc(token)
         storeData(passwordLoginData.body)
         saveUserDetails(passwordLoginData.body)
         saveToken(passwordLoginData.body.token)
@@ -136,6 +157,7 @@ const PasswordLogin = ({ navigation, route }) => {
     const user_id = username
     const password = passwords
     const fcm_token = fcmToken
+    console.log("fcmtoken password login", fcmToken)
     if (user_id !== "" && password !== "" && isChecked) {
       passwordLoginfunc({ user_id, password, fcm_token })
     }
@@ -244,7 +266,10 @@ const PasswordLogin = ({ navigation, route }) => {
   //function to handle Modal
   const modalWithBorderClose = () => {
     setModalWithBorder(false);
+    navigation.reset({ index: '0', routes: [{ name: 'Dashboard' }] })
+
     navigation.navigate("Dashboard")
+
   };
 
   const ModalContent = () => {
